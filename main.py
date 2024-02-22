@@ -23,10 +23,10 @@ def create_tables(conn):
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS sensor_data (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            heap INTEGER,
             deviceId TEXT,
             rssi INTEGER,
-            distance REAL,
-            heap INTEGER,
+            value REAL,
             timestamp TEXT,
             FOREIGN KEY (deviceId) REFERENCES device (deviceId)
         )
@@ -43,13 +43,13 @@ def insert_device(conn, deviceId, name):
     conn.commit()
 
 # Function to insert data into sensor_data table
-def insert_data(conn, deviceId, rssi, distance, heap):
+def insert_data(conn, deviceId, rssi, value, heap):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO sensor_data (deviceId, rssi, distance, heap, timestamp)
+        INSERT INTO sensor_data (deviceId, rssi, value, heap, timestamp)
         VALUES (?, ?, ?, ?, ?)
-    ''', (deviceId, rssi, distance, heap, timestamp))
+    ''', (deviceId, rssi, value, heap, timestamp))
     conn.commit()
 
 # Route to receive JSON data and save it into the database
@@ -58,11 +58,11 @@ def save_data():
     data = request.json
     deviceId = data.get('deviceId')
     rssi = data.get('rssi')
-    distance = data.get('distance')
+    value = data.get('value')
     heap = data.get('heap')
 
     conn = create_connection()
-    insert_data(conn, deviceId, rssi, distance, heap)
+    insert_data(conn, deviceId, rssi, value, heap)
     conn.close()
 
     return jsonify({'message': 'Data saved successfully'}), 200
