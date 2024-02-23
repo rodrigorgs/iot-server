@@ -67,6 +67,31 @@ def save_data():
 
     return jsonify({'message': 'Data saved successfully'}), 200
 
+# Params: from, to, id
+@app.route('/api/sensors/<id>/data', methods=['GET'])
+def get_sensor_data(id):
+    from_date = request.args.get('from')
+    to_date = request.args.get('to')
+
+    conn = create_connection()
+    cursor = conn.cursor()
+
+    args = [id]
+    sql = 'SELECT timestamp, value FROM sensor_data WHERE deviceId = ?'
+    if from_date:
+        sql += ' AND timestamp >= ?'
+        args.append(from_date)
+    if to_date:
+        sql += ' AND timestamp <= ?'
+        args.append(to_date)
+    
+    cursor.execute(sql, tuple(args))
+    data = cursor.fetchall()
+    conn.close()
+    result = [{"timestamp": x[0], "value": x[1]} for x in data]
+    return jsonify(result)
+
+
 # Initialization
 
 conn = create_connection()
