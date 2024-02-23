@@ -1,8 +1,12 @@
 from flask import Flask, request, jsonify
 import sqlite3
 from datetime import datetime
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
+
 
 # Function to create a database connection
 def create_connection():
@@ -69,6 +73,7 @@ def save_data():
 
 # Params: from, to, id
 @app.route('/api/sensors/<id>/data', methods=['GET'])
+@cross_origin()
 def get_sensor_data(id):
     from_date = request.args.get('from')
     to_date = request.args.get('to')
